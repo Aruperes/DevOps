@@ -1,15 +1,10 @@
 from flask import Flask, request, render_template, redirect
 from pymongo import MongoClient
-from dotenv import load_dotenv
-import os
-
-# Load file .env
-load_dotenv()
 
 app = Flask(__name__)
 
 # Ambil URL dari environment variable
-mongo_uri = os.getenv("MONGO_URI")
+mongo_uri = "mongodb+srv://lionking:lionking123@revando.zqfyyjo.mongodb.net/?retryWrites=true&w=majority&appName=Revando"
 
 # Koneksi ke MongoDB Atlas
 client = MongoClient(mongo_uri)
