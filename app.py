@@ -6,12 +6,12 @@ app = Flask(__name__)
 # --- PENTING ---
 # Masukkan API Key Gemini Anda langsung di sini
 # Ganti "MASUKKAN_API_KEY_ANDA_DI_SINI" dengan API Key Anda
-API_KEY = "MASUKKAN_API_KEY_ANDA_DI_SINI"
+API_KEY = "AIzaSyDXr6zd7wkAZm1HGOAkAAPK-igMc29n37E"
 # ---------------
 
 # Konfigurasi API Key Gemini
 try:
-    if not API_KEY or API_KEY == "MASUKKAN_API_KEY_ANDA_DI_SINI":
+    if not API_KEY or API_KEY == "AIzaSyDXr6zd7wkAZm1HGOAkAAPK-igMc29n37E":
         print("*****************************************************************")
         print("PERINGATAN: API_KEY belum diisi di app.py.")
         print("Anda bisa mendapatkan API Key dari: https://aistudio.google.com/app/apikey")
@@ -39,7 +39,7 @@ system_instruction = (
 )
 
 model = genai.GenerativeModel(
-    model_name="gemini-1.0-pro",
+    model_name="gemini-2.5-flash",
     generation_config=model_config,
     system_instruction=system_instruction
 )
