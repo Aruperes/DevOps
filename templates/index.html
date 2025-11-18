@@ -13,10 +13,8 @@
       rel="stylesheet"
     />
     <style>
-      /* ... (Semua CSS dari kode sebelumnya tetap di sini) ... */
       body {
         background-color: #f4f7f6;
-        padding-top: 70px; /* Tambahan padding untuk navbar fixed-top */
       }
       .hero {
         background-color: #dff0e8;
@@ -41,11 +39,13 @@
         margin-bottom: 1rem;
       }
       .text-primary-green {
-        color: #006a4e;
+        color: #006a4e; /* Warna hijau primer */
       }
       .text-secondary-green {
-        color: #4caf50;
+        color: #4caf50; /* Warna hijau sekunder */
       }
+
+      /* Chatbot UI */
       #chatbot-toggler {
         position: fixed;
         bottom: 30px;
@@ -54,6 +54,7 @@
         height: 60px;
         background-color: #006a4e;
         color: white;
+        border: none;
         border-radius: 50%;
         font-size: 1.5rem;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -144,62 +145,6 @@
     </style>
   </head>
   <body class="bg-light">
-    <nav
-      class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow-sm"
-    >
-      <div class="container">
-        <a class="navbar-brand fw-bold" href="/">
-          <i class="fas fa-child me-2"></i>Cegah Stunting
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/dashboard">Dashboard Pasien</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/login">Login</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link btn btn-primary text-white" href="/register"
-                >Register</a
-              >
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/logout">Logout</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-    <div class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %} {% for category, message in messages %}
-      <div
-        class="alert alert-{{ category }} alert-dismissible fade show mt-3"
-        role="alert"
-      >
-        {{ message }}
-        <button
-          type="button"
-          class="btn-close"
-          data-bs-dismiss="alert"
-          aria-label="Close"
-        ></button>
-      </div>
-      {% endfor %} {% endif %} {% endwith %}
-    </div>
-
     <div class="container my-5">
       <div class="text-center p-5 hero">
         <h1 class="display-4 fw-bold text-primary-green">Cegah Stunting</h1>
@@ -281,25 +226,33 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      // ... (Semua JavaScript untuk Chatbot tetap di sini) ...
+      // Seleksi elemen DOM
       const chatbotToggler = document.getElementById("chatbot-toggler");
       const chatbotContainer = document.getElementById("chatbot-container");
       const chatForm = document.getElementById("chat-input-form");
       const userInput = document.getElementById("user-input");
       const chatWindow = document.getElementById("chat-window");
 
+      // Tampilkan/sembunyikan chatbot
       chatbotToggler.addEventListener("click", () => {
         chatbotContainer.classList.toggle("show");
       });
 
+      // Fungsi untuk menampilkan pesan di chat window
       function appendMessage(sender, message) {
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("chat-message", `${sender}-message`);
+
+        // Sederhanakan parsing (Gemini mungkin mengirim markdown)
+        // Untuk sekarang, kita tampilkan sebagai teks biasa
         messageDiv.textContent = message;
+
         chatWindow.appendChild(messageDiv);
+        // Auto-scroll ke pesan terbaru
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
 
+      // Fungsi untuk menampilkan indikator loading
       function showLoadingIndicator() {
         const loadingDiv = document.createElement("div");
         loadingDiv.classList.add("chat-message", "bot-message", "loading");
@@ -309,6 +262,7 @@
         chatWindow.scrollTop = chatWindow.scrollHeight;
       }
 
+      // Fungsi untuk menghapus indikator loading
       function removeLoadingIndicator() {
         const loadingDiv = document.getElementById("loading-indicator");
         if (loadingDiv) {
@@ -316,14 +270,22 @@
         }
       }
 
+      // Kirim pesan saat form disubmit
       chatForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Mencegah form refresh halaman
         const message = userInput.value.trim();
-        if (!message) return;
+
+        if (!message) return; // Jangan kirim pesan kosong
+
+        // 1. Tampilkan pesan user
         appendMessage("user", message);
-        userInput.value = "";
+        userInput.value = ""; // Kosongkan input
+
+        // 2. Tampilkan indikator loading
         showLoadingIndicator();
+
         try {
+          // 3. Kirim pesan ke backend (API)
           const response = await fetch("/api/chat", {
             method: "POST",
             headers: {
@@ -331,15 +293,21 @@
             },
             body: JSON.stringify({ message: message }),
           });
+
+          // 4. Hapus loading
           removeLoadingIndicator();
+
           if (!response.ok) {
-            throw new Error("Gagal mendapatkan respons.");
+            throw new Error("Gagal mendapatkan respons dari server.");
           }
+
           const data = await response.json();
+
+          // 5. Tampilkan balasan dari bot
           appendMessage("bot", data.response);
         } catch (error) {
           console.error("Error:", error);
-          removeLoadingIndicator();
+          removeLoadingIndicator(); // Hapus loading jika error
           appendMessage(
             "bot",
             "Maaf, terjadi kesalahan. Silakan coba lagi nanti."
