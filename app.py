@@ -7,9 +7,8 @@ from datetime import datetime
 app = Flask(__name__)
 
 API_KEY = "AIzaSyAKoUgLWfPM_8nYEtpM5RDtzo7DSRzhhg8" 
-# ---------------
 MONGO_URI = "mongodb+srv://lionking:lionking123@revando.zqfyyjo.mongodb.net/?retryWrites=true&w=majority&appName=Revando"
-# --- Konfigurasi Gemini ---
+
 try:
     genai.configure(api_key=API_KEY)
 except Exception as e:
@@ -33,12 +32,11 @@ system_instruction = (
 )
 
 model = genai.GenerativeModel(
-    model_name="gemini-2.5-flash", # Diubah ke model yang valid
+    model_name="gemini-2.5-flash",
     generation_config=model_config,
     system_instruction=system_instruction
 )
 
-# Buat sesi chat (agar bisa mengingat konteks)
 chat_session = model.start_chat(history=[])
 
 # --- Konfigurasi MongoDB ---
