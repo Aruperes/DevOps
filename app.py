@@ -32,7 +32,6 @@ system_instruction = (
     "Selalu pertimbangkan Data Pasien yang diberikan saat merumuskan jawaban."
 )
 
-# Mengganti ke model yang valid: gemini-1.5-flash
 model = genai.GenerativeModel(
     model_name="gemini-2.5-flash", # Diubah ke model yang valid
     generation_config=model_config,
