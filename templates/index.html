@@ -1,698 +1,615 @@
 <!DOCTYPE html>
 <html lang="id">
   <head>
-    <meta charset="UTF-R" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cegah Stunting - Info & Chatbot Kesehatan</title>
+    <title>Sistem Pencegahan Stunting</title>
 
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
-      /* ... (Seluruh blok <style> besar dari respons sebelumnya diletakkan di sini) ... */
-      /* Saya hanya akan menambahkan style baru untuk form data */
-
+      /* Tetap gunakan style yang sama agar konsisten */
       :root {
-        --primary-green: #006a4e;
-        --secondary-green: #4caf50;
-        --light-green-bg: #dff0e8;
-        --light-gray-bg: #f8f9fa; /* Lebih cerah dari sebelumnya */
-        --text-dark: #212529;
-        --text-light: #f8f9fa;
-        --white-bg: #ffffff;
-        --border-color: #dee2e6;
+        --primary: #006a4e;
+        --sidebar-width: 280px;
       }
       body {
-        background-color: var(--light-gray-bg);
-        font-family: "Poppins", sans-serif;
-        color: var(--text-dark);
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: #f1f5f9;
+        overflow-x: hidden;
       }
-      .navbar {
-        background-color: var(--white-bg);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      .sidebar {
+        width: var(--sidebar-width);
+        height: 100vh;
+        position: fixed;
+        background: var(--primary);
+        color: white;
+        padding: 20px;
+        z-index: 1000;
       }
-      .navbar-brand {
-        color: var(--primary-green) !important;
-        font-weight: 700;
+      .main-content {
+        margin-left: var(--sidebar-width);
+        padding: 30px;
       }
-      .navbar-brand i {
-        margin-right: 8px;
-        color: var(--secondary-green);
+      .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
       }
-      .hero {
-        background-color: var(--white-bg);
-        padding: 4rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
-        margin-top: 2rem;
+      .app-section {
+        display: none;
+        animation: fadeIn 0.3s;
       }
-      .text-primary-green {
-        color: var(--primary-green);
+      .app-section.active {
+        display: block;
       }
-      .text-secondary-green {
-        color: var(--secondary-green);
-      }
-      .info-card {
-        background-color: var(--white-bg);
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-      }
-      .info-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 106, 78, 0.1);
-      }
-      .info-card .card-body {
-        padding: 2rem;
-      }
-      .info-card i {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
-      /* --- BAGIAN BARU: Data Pasien --- */
-      .data-pasien-container {
-        background-color: var(--white-bg);
-        padding: 2.5rem;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+      /* Chatbot & Markdown */
+      .markdown-body p {
+        margin-bottom: 5px;
       }
-      .nav-tabs .nav-link {
-        color: var(--primary-green);
-        font-weight: 600;
+      .markdown-body ul {
+        padding-left: 20px;
       }
-      .nav-tabs .nav-link.active {
-        background-color: var(--primary-green);
-        color: var(--white-bg);
-        border-color: var(--primary-green);
-      }
-      .form-label {
-        font-weight: 600;
-      }
-      .btn-simpan {
-        background-color: var(--secondary-green);
-        border-color: var(--secondary-green);
-        color: var(--white-bg);
-        font-weight: 600;
-      }
-      .btn-simpan:hover {
-        background-color: #3e8e41;
-        border-color: #3e8e41;
-        color: var(--white-bg);
-      }
-
-      /* ... (Sisa CSS Chatbot dari respons sebelumnya ada di sini) ... */
-      #chatbot-toggler {
+      .chat-widget {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        width: 60px;
-        height: 60px;
-        background-color: var(--primary-green);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        font-size: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        cursor: pointer;
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: background-color 0.3s ease;
+        z-index: 2000;
       }
-      #chatbot-toggler:hover {
-        background-color: #004a38;
-      }
-      #chatbot-container {
-        position: fixed;
-        bottom: 100px;
-        right: 30px;
-        width: 370px;
-        height: 550px;
-        background: var(--white-bg);
+      .chat-window {
+        position: absolute;
+        bottom: 80px;
+        right: 0;
+        width: 380px;
+        height: 500px;
+        background: white;
         border-radius: 15px;
-        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
-        display: flex;
+        display: none;
         flex-direction: column;
-        overflow: hidden;
-        z-index: 999;
-        transform: scale(0);
-        transform-origin: bottom right;
-        transition: transform 0.3s ease;
+        border: 1px solid #ddd;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
-      #chatbot-container.show {
-        transform: scale(1);
-      }
-      #chat-header {
-        background-color: var(--primary-green);
-        color: white;
-        padding: 1.25rem;
-        text-align: center;
-        font-weight: 600;
-        font-size: 1.1rem;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 2;
-      }
-      #chat-window {
-        flex-grow: 1;
-        padding: 1rem;
+      .chat-messages {
+        flex: 1;
         overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        background-color: #f9f9f9;
+        padding: 15px;
+        background: #f8fafc;
       }
-      .chat-message {
-        max-width: 85%;
-        padding: 0.75rem 1rem;
-        border-radius: 18px;
-        margin-bottom: 0.75rem;
-        word-wrap: break-word;
-        line-height: 1.4;
-        white-space: pre-wrap;
+      .msg {
+        padding: 8px 12px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+        max-width: 80%;
+        font-size: 0.9rem;
       }
-      .user-message {
-        background-color: var(--primary-green);
+      .msg-user {
+        background: var(--primary);
         color: white;
         align-self: flex-end;
-        border-bottom-right-radius: 5px;
+        margin-left: auto;
       }
-      .bot-message {
-        background-color: var(--white-bg);
-        color: var(--text-dark);
+      .msg-bot {
+        background: white;
+        border: 1px solid #ddd;
         align-self: flex-start;
-        border: 1px solid #eee;
-        border-bottom-left-radius: 5px;
-        position: relative;
-        padding-left: 3.5rem;
       }
-      .bot-message::before {
-        content: "\f0f0";
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 30px;
-        height: 30px;
+      .chat-btn {
+        width: 60px;
+        height: 60px;
         border-radius: 50%;
-        background: var(--secondary-green);
+        background: var(--primary);
         color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-      }
-      #chat-window .bot-message:first-child {
-        padding-left: 3.5rem;
-      }
-      #chat-window .bot-message:first-child::before {
-        content: "\f0f0";
-        font-family: "Font Awesome 6 Free";
-        font-weight: 900;
-        position: absolute;
-        left: 10px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: var(--secondary-green);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.9rem;
-      }
-      .bot-message.loading {
-        font-style: italic;
-        color: #777;
-        padding-left: 1rem;
-      }
-      .bot-message.loading::before {
-        display: none;
-      }
-      #chat-input-form {
-        display: flex;
-        border-top: 1px solid var(--border-color);
-        padding: 0.75rem;
-        background: var(--white-bg);
-      }
-      #chat-input-form input {
-        flex-grow: 1;
         border: none;
-        padding: 0.75rem;
-        border-radius: 20px;
-        background-color: var(--light-gray-bg);
-        margin-right: 0.5rem;
+        font-size: 1.5rem;
+        cursor: pointer;
       }
-      #chat-input-form input:focus {
-        outline: none;
-        box-shadow: 0 0 0 2px var(--primary-green);
+
+      .nav-link {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        display: block;
+        margin-bottom: 5px;
+        border-radius: 8px;
       }
-      #chat-input-form button {
-        border: none;
-        background: var(--primary-green);
+      .nav-link:hover,
+      .nav-link.active {
+        background: rgba(255, 255, 255, 0.2);
         color: white;
-        border-radius: 50%;
-        width: 45px;
-        height: 45px;
-        flex-shrink: 0;
-        transition: background-color 0.3s ease;
+        font-weight: bold;
       }
-      #chat-input-form button:hover {
-        background: #004a38;
-      }
-      .footer {
-        background-color: var(--white-bg);
-        padding: 2rem 0;
-        margin-top: 4rem;
-        border-top: 1px solid var(--border-color);
-        text-align: center;
-        color: #6c757d;
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 0;
+          padding: 0;
+        }
+        .main-content {
+          margin-left: 0;
+        }
       }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-light">
-      <div class="container">
-        <a class="navbar-brand" href="#">
-          <i class="fas fa-seedling"></i>
-          Sahabat Gizi
-        </a>
-      </div>
-    </nav>
-
-    <div class="container my-5">
-      <div class="hero text-center">
-        <h1 class="display-4 fw-bold text-primary-green">Cegah Stunting</h1>
-        <p class="lead col-lg-8 mx-auto">
-          Wujudkan Generasi Sehat Bebas Stunting. Temukan informasi lengkap
-          mengenai pencegahan, gizi, dan nutrisi untuk buah hati Anda.
-        </p>
-      </div>
+    <div class="sidebar">
+      <h4 class="mb-4"><i class="fas fa-seedling"></i> Sahabat Gizi</h4>
+      <nav>
+        <div class="nav-link active" onclick="switchTab('dashboard')">
+          <i class="fas fa-home w-25"></i> Dashboard
+        </div>
+        <div class="nav-link" onclick="switchTab('checkup')">
+          <i class="fas fa-stethoscope w-25"></i> Cek Stunting
+        </div>
+        <div class="nav-link" onclick="switchTab('mealplan')">
+          <i class="fas fa-utensils w-25"></i> Menu MPASI
+        </div>
+        <div class="nav-link" onclick="switchTab('history')">
+          <i class="fas fa-history w-25"></i> Riwayat
+        </div>
+      </nav>
     </div>
 
-    <div class="container py-5">
-      <h2 class="text-center mb-5 fw-bold text-primary-green">
-        Mengenal & Mencegah Stunting
-      </h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card info-card">
-            <div class="card-body text-center">
-              <i class="fas fa-child text-secondary-green"></i>
-              <h5 class="card-title fw-bold mt-3">Apa itu Stunting?</h5>
-              <p class="card-text">
-                Stunting adalah kondisi gagal tumbuh pada anak balita akibat
-                kekurangan gizi kronis.
-              </p>
+    <div class="main-content">
+      <div id="dashboard" class="app-section active">
+        <h2 class="fw-bold mb-4">Dashboard Monitoring</h2>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="stat-card bg-primary text-white border-0">
+              <h5>Status Terakhir</h5>
+              <h2 class="fw-bold" id="dash-status">-</h2>
+              <small id="dash-date">Belum ada data</small>
             </div>
           </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card info-card">
-            <div class="card-body text-center">
-              <i class="fas fa-heartbeat text-danger"></i>
-              <h5 class="card-title fw-bold mt-3">Kunci Pencegahan</h5>
-              <p class="card-text">
-                Fokus pada 1000 Hari Pertama Kehidupan (HPK), penuhi gizi ibu
-                hamil, dan berikan ASI eksklusif.
-              </p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card info-card">
-            <div class="card-body text-center">
-              <i class="fas fa-utensils text-primary"></i>
-              <h5 class="card-title fw-bold mt-3">Gizi Seimbang</h5>
-              <p class="card-text">
-                Pastikan anak mendapatkan asupan protein hewani, lemak sehat,
-                vitamin, dan mineral yang cukup.
-              </p>
+          <div class="col-md-8">
+            <div class="stat-card">
+              <h5>Grafik Pertumbuhan</h5>
+              <canvas id="growthChart" height="100"></canvas>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="container py-5">
-      <div class="data-pasien-container">
-        <h2 class="text-center mb-4 fw-bold text-primary-green">Data Pasien</h2>
-        <p class="text-center text-muted mb-4">
-          Isi data di bawah ini agar Sahabat Gizi dapat memberi saran yang lebih
-          sesuai. Data ini akan disimpan di server kami.
-        </p>
-
-        <ul class="nav nav-tabs" id="pasienTab" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button
-              class="nav-link active"
-              id="ibu-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#ibu-form"
-              type="button"
-              role="tab"
-              aria-controls="ibu-form"
-              aria-selected="true"
-            >
-              Data Ibu Hamil
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-              class="nav-link"
-              id="anak-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#anak-form"
-              type="button"
-              role="tab"
-              aria-controls="anak-form"
-              aria-selected="false"
-            >
-              Data Anak (0-5 Tahun)
-            </button>
-          </li>
-        </ul>
-
-        <div class="tab-content" id="pasienTabContent">
-          <div
-            class="tab-pane fade show active"
-            id="ibu-form"
-            role="tabpanel"
-            aria-labelledby="ibu-tab"
-          >
-            <form id="form-data-ibu" class="mt-4">
-              <div class="mb-3">
-                <label for="ibu-usia-kehamilan" class="form-label"
-                  >Usia Kehamilan (minggu)</label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  id="ibu-usia-kehamilan"
-                  placeholder="Contoh: 30"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="ibu-kondisi" class="form-label"
-                  >Kondisi Khusus (Opsional)</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="ibu-kondisi"
-                  placeholder="Contoh: Anemia, Diabetes Gestasional"
-                />
-              </div>
-            </form>
+      <div id="checkup" class="app-section">
+        <h2 class="fw-bold mb-4">Cek Kesehatan Anak</h2>
+        <div class="row">
+          <div class="col-md-5">
+            <div class="stat-card">
+              <form id="growth-form">
+                <div class="mb-3">
+                  <label class="fw-bold">Nama Lengkap Anak</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="input-name"
+                    required
+                  />
+                </div>
+                <div class="row">
+                  <div class="col-6 mb-3">
+                    <label>Usia (Bulan)</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="input-age"
+                      required
+                    />
+                  </div>
+                  <div class="col-6 mb-3">
+                    <label>Gender</label>
+                    <select class="form-select" id="input-gender">
+                      <option value="Laki-laki">Laki-laki</option>
+                      <option value="Perempuan">Perempuan</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label>Berat (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="form-control"
+                    id="input-weight"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label>Tinggi/Panjang (cm)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    class="form-control"
+                    id="input-height"
+                    required
+                  />
+                </div>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                  Analisis Sekarang
+                </button>
+              </form>
+            </div>
           </div>
-
-          <div
-            class="tab-pane fade"
-            id="anak-form"
-            role="tabpanel"
-            aria-labelledby="anak-tab"
-          >
-            <form id="form-data-anak" class="mt-4">
-              <div class="mb-3">
-                <label for="anak-usia" class="form-label"
-                  >Usia Anak (bulan)</label
-                >
-                <input
-                  type="number"
-                  class="form-control"
-                  id="anak-usia"
-                  placeholder="Contoh: 8"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="anak-berat" class="form-label"
-                  >Berat Badan (kg)</label
-                >
-                <input
-                  type="number"
-                  step="0.1"
-                  class="form-control"
-                  id="anak-berat"
-                  placeholder="Contoh: 7.5"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="anak-panjang" class="form-label"
-                  >Tinggi/Panjang Badan (cm)</label
-                >
-                <input
-                  type="number"
-                  step="0.1"
-                  class="form-control"
-                  id="anak-panjang"
-                  placeholder="Contoh: 68.5"
-                />
-              </div>
-              <div class="mb-3">
-                <label for="anak-kondisi" class="form-label"
-                  >Kondisi Khusus (Opsional)</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="anak-kondisi"
-                  placeholder="Contoh: Alergi susu sapi, GTM"
-                />
-              </div>
-            </form>
+          <div class="col-md-7">
+            <div class="stat-card" id="result-card" style="display: none">
+              <h4 class="text-primary fw-bold" id="res-name-display"></h4>
+              <h3 id="res-status" class="mb-3"></h3>
+              <div
+                id="res-advice"
+                class="border p-3 rounded bg-light markdown-body"
+              ></div>
+              <button
+                class="btn btn-success mt-3"
+                onclick="switchTab('mealplan')"
+              >
+                Buat Menu Makanan
+              </button>
+            </div>
+            <div id="loading-checkup" class="text-center py-5 d-none">
+              <div class="spinner-border text-primary"></div>
+              <p>Sedang Menganalisis...</p>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4">
-          <button type="button" class="btn btn-simpan" id="save-data-btn">
-            <i class="fas fa-save me-2"></i>Simpan Data
+      <div id="mealplan" class="app-section">
+        <h2>Generator Menu MPASI</h2>
+        <div class="stat-card">
+          <button id="btn-gen-menu" class="btn btn-primary mb-3">
+            Buat Menu Baru
           </button>
-          <small id="data-status" class="text-muted"
-            >Data belum disimpan.</small
+          <div id="menu-result" class="markdown-body bg-light p-3 rounded">
+            Belum ada menu.
+          </div>
+        </div>
+      </div>
+
+      <div id="history" class="app-section">
+        <div class="d-flex justify-content-between mb-3">
+          <h2>Riwayat Pemeriksaan</h2>
+          <button
+            class="btn btn-outline-primary btn-sm"
+            onclick="loadHistoryData()"
           >
+            Refresh
+          </button>
+        </div>
+        <div class="stat-card">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Nama</th>
+                  <th>Usia</th>
+                  <th>BB / TB</th>
+                  <th>Status</th>
+                  <th class="text-end">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-    <footer class="footer">
-      <p class="mb-0">
-        &copy; 2025 Sahabat Gizi. Informasi ini bukan pengganti nasihat medis
-        profesional.
-      </p>
-    </footer>
 
-    <button id="chatbot-toggler">
-      <i class="fas fa-comments"></i>
-    </button>
-
-    <div id="chatbot-container">
-      <div id="chat-header">Sahabat Gizi</div>
-      <div id="chat-window">
-        <div class="chat-message bot-message">
-          Halo! Saya Sahabat Gizi. Silakan isi data pasien di halaman utama agar
-          saya bisa memberi saran lebih baik.
+    <div class="chat-widget">
+      <div class="chat-window" id="chat-interface">
+        <div class="bg-primary text-white p-3 d-flex justify-content-between">
+          <span>Konsultan AI</span>
+          <button class="btn btn-sm text-white" onclick="toggleChat()">
+            X
+          </button>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="p-3 border-top bg-white">
+          <form id="chat-form" class="d-flex gap-2">
+            <input
+              type="text"
+              id="chat-input"
+              class="form-control"
+              placeholder="Tanya..."
+              required
+            />
+            <button class="btn btn-primary">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
         </div>
       </div>
-      <form id="chat-input-form">
-        <input
-          type="text"
-          id="user-input"
-          placeholder="Ketik pertanyaan Anda..."
-          autocomplete="off"
-          required
-        />
-        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-      </form>
+      <button class="chat-btn" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
+      </button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="modal fade" id="editNameModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Nama Anak</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-id" />
+            <label class="form-label">Nama Baru</label>
+            <input type="text" class="form-control" id="edit-name-input" />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              onclick="saveNameUpdate()"
+            >
+              Simpan Perubahan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script>
-      // === Variabel Global untuk Konteks ===
-      let currentUserContext = ""; // Ini akan menyimpan data untuk dikirim ke chat
-
-      // === Seleksi Elemen DOM ===
-      const chatbotToggler = document.getElementById("chatbot-toggler");
-      const chatbotContainer = document.getElementById("chatbot-container");
-      const chatForm = document.getElementById("chat-input-form");
-      const userInput = document.getElementById("user-input");
-      const chatWindow = document.getElementById("chat-window");
-
-      // --- Elemen Baru ---
-      const saveDataBtn = document.getElementById("save-data-btn");
-      const dataStatus = document.getElementById("data-status");
-      // Form Ibu
-      const ibuUsia = document.getElementById("ibu-usia-kehamilan");
-      const ibuKondisi = document.getElementById("ibu-kondisi");
-      // Form Anak
-      const anakUsia = document.getElementById("anak-usia");
-      const anakBerat = document.getElementById("anak-berat");
-      const anakPanjang = document.getElementById("anak-panjang");
-      const anakKondisi = document.getElementById("anak-kondisi");
-
-      // === Logika Chatbot (Sama) ===
-      chatbotToggler.addEventListener("click", () => {
-        chatbotContainer.classList.toggle("show");
-      });
-
-      function appendMessage(sender, message) {
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("chat-message", `${sender}-message`);
-        messageDiv.textContent = message;
-        chatWindow.appendChild(messageDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-      }
-
-      function showLoadingIndicator() {
-        const loadingDiv = document.createElement("div");
-        loadingDiv.classList.add("chat-message", "bot-message", "loading");
-        loadingDiv.textContent = "Sahabat Gizi sedang mengetik...";
-        loadingDiv.id = "loading-indicator";
-        chatWindow.appendChild(loadingDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-      }
-
-      function removeLoadingIndicator() {
-        const loadingDiv = document.getElementById("loading-indicator");
-        if (loadingDiv) {
-          loadingDiv.remove();
-        }
-      }
-
-      // === (DIMODIFIKASI) Kirim pesan saat form disubmit ===
-      chatForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const message = userInput.value.trim();
-        if (!message) return;
-
-        appendMessage("user", message);
-        userInput.value = "";
-        showLoadingIndicator();
-
-        try {
-          const response = await fetch("/api/chat", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
+      let currentChild = null;
+      // Chart Init
+      const ctx = document.getElementById("growthChart").getContext("2d");
+      const growthChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["Lahir"],
+          datasets: [
+            {
+              label: "Berat (kg)",
+              data: [3],
+              borderColor: "#006A4E",
+              tension: 0.4,
             },
-            // ---- PERUBAHAN DI SINI ----
-            // Kirim pesan DAN konteks yang sudah disimpan
-            body: JSON.stringify({
-              message: message,
-              context: currentUserContext,
-            }),
-            // -------------------------
-          });
-
-          removeLoadingIndicator();
-          if (!response.ok) {
-            throw new Error("Gagal mendapatkan respons dari server.");
-          }
-          const data = await response.json();
-          if (data.response) {
-            appendMessage("bot", data.response);
-          } else {
-            throw new Error("Respons server tidak valid.");
-          }
-        } catch (error) {
-          console.error("Error:", error);
-          removeLoadingIndicator();
-          appendMessage(
-            "bot",
-            "Maaf, terjadi kesalahan. Silakan coba lagi nanti."
-          );
-        }
+          ],
+        },
       });
 
-      // === (BARU) Logika Simpan Data Pasien ===
-      saveDataBtn.addEventListener("click", async () => {
-        // 1. Kumpulkan data dari form
-        const motherData = {
-          usia_kehamilan_minggu: ibuUsia.value ? parseInt(ibuUsia.value) : null,
-          kondisi_khusus: ibuKondisi.value.trim(),
-        };
-        const childData = {
-          usia_bulan: anakUsia.value ? parseInt(anakUsia.value) : null,
-          berat_kg: anakBerat.value ? parseFloat(anakBerat.value) : null,
-          panjang_cm: anakPanjang.value ? parseFloat(anakPanjang.value) : null,
-          kondisi_khusus: anakKondisi.value.trim(),
-        };
+      function switchTab(id) {
+        document
+          .querySelectorAll(".app-section")
+          .forEach((el) => el.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document
+          .querySelectorAll(".nav-link")
+          .forEach((el) => el.classList.remove("active"));
+        // Highlight active nav logic can be simpler but this works
+        if (id === "history") loadHistoryData();
+      }
 
-        // 2. Format data untuk disimpan di MongoDB
-        const dataToSave = {
-          mother_data: motherData,
-          child_data: childData,
-        };
+      // --- CEK STUNTING ---
+      document
+        .getElementById("growth-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          document.getElementById("loading-checkup").classList.remove("d-none");
+          document.getElementById("result-card").style.display = "none";
 
-        // 3. Format data untuk konteks chatbot (string)
-        let contextString = "";
-        if (motherData.usia_kehamilan_minggu) {
-          contextString += `Data Ibu: Hamil ${motherData.usia_kehamilan_minggu} minggu. `;
-          if (motherData.kondisi_khusus)
-            contextString += `Kondisi: ${motherData.kondisi_khusus}. `;
+          const data = {
+            nama: document.getElementById("input-name").value,
+            usia_bulan: parseInt(document.getElementById("input-age").value),
+            gender: document.getElementById("input-gender").value,
+            berat_kg: parseFloat(document.getElementById("input-weight").value),
+            panjang_cm: parseFloat(
+              document.getElementById("input-height").value
+            ),
+          };
+
+          try {
+            const res = await fetch("/api/analyze_growth", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ child_data: data }),
+            });
+            const result = await res.json();
+            currentChild = result.child_data;
+
+            // Render UI
+            document.getElementById("loading-checkup").classList.add("d-none");
+            document.getElementById("result-card").style.display = "block";
+            document.getElementById("res-name-display").textContent =
+              result.child_data.nama;
+
+            const statusEl = document.getElementById("res-status");
+            statusEl.textContent = result.calculation.status;
+            statusEl.className = `fw-bold mb-3 text-${result.calculation.color}`;
+
+            document.getElementById("res-advice").innerHTML = marked.parse(
+              result.ai_advice
+            );
+
+            // Update Dashboard
+            document.getElementById("dash-status").textContent =
+              result.calculation.status;
+            document.getElementById("dash-date").textContent =
+              new Date().toLocaleDateString();
+            growthChart.data.labels.push(`Bulan ${data.usia_bulan}`);
+            growthChart.data.datasets[0].data.push(data.berat_kg);
+            growthChart.update();
+          } catch (err) {
+            alert("Error: " + err);
+            document.getElementById("loading-checkup").classList.add("d-none");
+          }
+        });
+
+      // --- HISTORY & EDIT NAMA ---
+      async function loadHistoryData() {
+        const tbody = document.getElementById("history-table-body");
+        tbody.innerHTML =
+          '<tr><td colspan="6" class="text-center">Loading...</td></tr>';
+        try {
+          const res = await fetch("/api/history");
+          const data = await res.json();
+          tbody.innerHTML = "";
+          if (!data.length) {
+            tbody.innerHTML =
+              '<tr><td colspan="6" class="text-center">Kosong</td></tr>';
+            return;
+          }
+
+          data.forEach((item) => {
+            const statusClass = item.status_result.includes("Normal")
+              ? "success"
+              : item.status_result.includes("Risiko")
+              ? "warning"
+              : "danger";
+            tbody.innerHTML += `
+                        <tr>
+                            <td>${new Date(
+                              item.created_at
+                            ).toLocaleDateString()}</td>
+                            <td class="fw-bold">${item.nama_anak}</td>
+                            <td>${item.usia_bulan} bln</td>
+                            <td>${item.berat_kg}kg / ${item.panjang_cm}cm</td>
+                            <td><span class="badge bg-${statusClass}">${
+              item.status_result
+            }</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-warning" onclick="openEditModal('${
+                                  item._id
+                                }', '${
+              item.nama_anak
+            }')"><i class="fas fa-pencil"></i></button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteHistory('${
+                                  item._id
+                                }')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+          });
+        } catch (e) {
+          tbody.innerHTML = "Error loading data";
         }
-        if (childData.usia_bulan) {
-          contextString += `\nData Anak: Usia ${childData.usia_bulan} bulan. `;
-          if (childData.berat_kg)
-            contextString += `Berat ${childData.berat_kg} kg. `;
-          if (childData.panjang_cm)
-            contextString += `Panjang ${childData.panjang_cm} cm. `;
-          if (childData.kondisi_khusus)
-            contextString += `Kondisi: ${childData.kondisi_khusus}.`;
+      }
+
+      async function deleteHistory(id) {
+        if (confirm("Hapus data ini?")) {
+          await fetch(`/api/history/${id}`, { method: "DELETE" });
+          loadHistoryData();
         }
+      }
 
-        // Update variabel global
-        currentUserContext = contextString.trim();
+      // --- LOGIKA MODAL EDIT (PENGGANTI PROMPT) ---
+      let modalInstance;
+      function openEditModal(id, currentName) {
+        document.getElementById("edit-id").value = id;
+        document.getElementById("edit-name-input").value = currentName;
 
-        // 4. Kirim data ke server (MongoDB)
-        dataStatus.textContent = "Menyimpan...";
-        dataStatus.classList.remove("text-success", "text-danger");
-        dataStatus.classList.add("text-muted");
+        // Tampilkan Modal Bootstrap
+        const modalEl = document.getElementById("editNameModal");
+        modalInstance = new bootstrap.Modal(modalEl);
+        modalInstance.show();
+      }
+
+      async function saveNameUpdate() {
+        const id = document.getElementById("edit-id").value;
+        const newName = document.getElementById("edit-name-input").value;
+
+        if (!newName) return alert("Nama tidak boleh kosong");
 
         try {
-          const response = await fetch("/api/save_data", {
+          await fetch("/api/history/update_name", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: id, new_name: newName }),
+          });
+          // Tutup Modal & Refresh Table
+          modalInstance.hide();
+          loadHistoryData();
+        } catch (e) {
+          alert("Gagal update nama");
+        }
+      }
+
+      // --- MEAL PLAN & CHAT ---
+      document
+        .getElementById("btn-gen-menu")
+        .addEventListener("click", async () => {
+          if (!currentChild) return alert("Cek kesehatan dulu!");
+          document.getElementById("menu-result").textContent =
+            "Sedang membuat menu...";
+          const res = await fetch("/api/generate_meal_plan", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(dataToSave),
+            body: JSON.stringify({ child_data: currentChild }),
           });
-
-          if (!response.ok) {
-            throw new Error("Gagal menyimpan ke server.");
-          }
-
-          const result = await response.json();
-          console.log("Data tersimpan di DB, ID: ", result.saved_id);
-
-          // 5. Beri umpan balik ke user
-          dataStatus.textContent = "Data berhasil disimpan!";
-          dataStatus.classList.remove("text-muted", "text-danger");
-          dataStatus.classList.add("text-success");
-
-          // Beri tahu user di chatbot
-          appendMessage(
-            "bot",
-            "Data pasien telah diperbarui. Silakan ajukan pertanyaan Anda."
+          const d = await res.json();
+          document.getElementById("menu-result").innerHTML = marked.parse(
+            d.response
           );
-        } catch (error) {
-          console.error("Error saving data:", error);
-          dataStatus.textContent = "Error saat menyimpan data.";
-          dataStatus.classList.remove("text-muted", "text-success");
-          dataStatus.classList.add("text-danger");
-        }
-      });
+        });
+
+      function toggleChat() {
+        const el = document.getElementById("chat-interface");
+        el.style.display = el.style.display === "flex" ? "none" : "flex";
+      }
+
+      document
+        .getElementById("chat-form")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const inp = document.getElementById("chat-input");
+          const txt = inp.value;
+          if (!txt) return;
+
+          // Add User Msg
+          const chatBox = document.getElementById("chat-messages");
+          chatBox.innerHTML += `<div class="msg msg-user">${txt}</div>`;
+          inp.value = "";
+
+          // API Call
+          const res = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: txt }),
+          });
+          const d = await res.json();
+          chatBox.innerHTML += `<div class="msg msg-bot markdown-body">${marked.parse(
+            d.response
+          )}</div>`;
+          chatBox.scrollTop = chatBox.scrollHeight;
+        });
     </script>
   </body>
 </html>
