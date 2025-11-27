@@ -4,13 +4,15 @@ import google.generativeai as genai
 import pymongo
 from datetime import datetime
 from bson.objectid import ObjectId
+from dotenv import load_dotenv  
+
+load_dotenv()
 
 app = Flask(__name__)
 
-API_KEY = "AIzaSyAtKsYyX3Gjd-J5vM5fIQY2HDFW1extfhU" 
-MONGO_URI = "mongodb+srv://lionking:lionking123@revando.zqfyyjo.mongodb.net/?retryWrites=true&w=majority&appName=Revando"
+API_KEY = os.getenv("GEMINI_API_KEY")
+MONGO_URI = os.getenv("MONGO_URI")
 
-# Config AI
 try:
     genai.configure(api_key=API_KEY)
     system_instruction = (
