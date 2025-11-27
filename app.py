@@ -179,7 +179,7 @@ def generate_meal_plan():
     try:
         data = request.json
         child = data.get('child_data')
-        prompt = f"Buatkan menu makan 1 hari untuk anak {child['usia_bulan']} bulan, berat {child['berat_kg']}kg. Format Tabel HTML."
+        prompt = f"Buatkan menu makan 1 hari untuk anak {child['usia_bulan']} bulan, berat {child['berat_kg']}kg."
         resp = model.generate_content(prompt)
         return jsonify({'response': resp.text})
     except Exception as e:
